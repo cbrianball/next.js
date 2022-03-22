@@ -427,7 +427,7 @@ impl<C: Comments> Fold for EmotionTransformer<C> {
                                 self.import_packages.get(&i.to_id())
                             {
                                 if !c.args.is_empty() {
-                                    let mut args_props = Vec::with_capacity(2);
+                                    let mut args_props = Vec::with_capacity(3);
                                     args_props.push(self.create_label_prop_node("target"));
                                     self.comments.add_pure_comment(expr.span.lo());
                                     if self.options.auto_label.unwrap_or(false) {
@@ -442,7 +442,15 @@ impl<C: Comments> Fold for EmotionTransformer<C> {
                                         )));
                                     }
                                     if let Some(cm) = self.create_sourcemap(expr.span.lo()) {
-                                        c.args.push(cm.as_arg());
+                                        args_props.push(PropOrSpread::Prop(Box::new(
+                                            Prop::KeyValue(KeyValueProp {
+                                                key: PropName::Ident(Ident::new(
+                                                    "map".into(),
+                                                    DUMMY_SP,
+                                                )),
+                                                value: cm.into(),
+                                            }),
+                                        )));
                                     }
                                     c.args.push(
                                         Expr::Object(ObjectLit {
@@ -464,7 +472,7 @@ impl<C: Comments> Fold for EmotionTransformer<C> {
                             if let PackageMeta::Named(kind) = package {
                                 if matches!(kind, ExprKind::Styled) {
                                     if let MemberProp::Ident(prop) = &m.prop {
-                                        let mut args_props = Vec::with_capacity(2);
+                                        let mut args_props = Vec::with_capacity(3);
                                         args_props.push(self.create_label_prop_node("target"));
                                         let mut args = vec![prop.sym.as_ref().as_arg()];
                                         if !self.in_jsx_element {
@@ -480,6 +488,18 @@ impl<C: Comments> Fold for EmotionTransformer<C> {
                                                     }),
                                                 )));
                                             }
+                                            if let Some(cm) = self.create_sourcemap(expr.span.lo())
+                                            {
+                                                args_props.push(PropOrSpread::Prop(Box::new(
+                                                    Prop::KeyValue(KeyValueProp {
+                                                        key: PropName::Ident(Ident::new(
+                                                            "map".into(),
+                                                            DUMMY_SP,
+                                                        )),
+                                                        value: cm.into(),
+                                                    }),
+                                                )));
+                                            }
                                             args.push(
                                                 Expr::Object(ObjectLit {
                                                     span: DUMMY_SP,
@@ -487,10 +507,6 @@ impl<C: Comments> Fold for EmotionTransformer<C> {
                                                 })
                                                 .as_arg(),
                                             );
-                                            if let Some(cm) = self.create_sourcemap(expr.span.lo())
-                                            {
-                                                args.push(cm.as_arg());
-                                            }
                                         }
                                         return CallExpr {
                                             span: expr.span,
@@ -542,7 +558,7 @@ impl<C: Comments> Fold for EmotionTransformer<C> {
                                 self.import_packages.get(&i.to_id())
                             {
                                 let mut callee = call.take();
-                                let mut object_props = Vec::with_capacity(2);
+                                let mut object_props = Vec::with_capacity(3);
                                 object_props.push(self.create_label_prop_node("target"));
                                 self.comments.add_pure_comment(callee.span.lo());
                                 if self.options.auto_label.unwrap_or(false) {
@@ -557,7 +573,15 @@ impl<C: Comments> Fold for EmotionTransformer<C> {
                                     )));
                                 }
                                 if let Some(cm) = self.create_sourcemap(call.span.lo()) {
-                                    callee.args.push(cm.as_arg());
+                                    object_props.push(PropOrSpread::Prop(Box::new(
+                                        Prop::KeyValue(KeyValueProp {
+                                            key: PropName::Ident(Ident::new(
+                                                "map".into(),
+                                                DUMMY_SP,
+                                            )),
+                                            value: cm.into(),
+                                        }),
+                                    )));
                                 }
                                 callee.args.push(
                                     Expr::Object(ObjectLit {

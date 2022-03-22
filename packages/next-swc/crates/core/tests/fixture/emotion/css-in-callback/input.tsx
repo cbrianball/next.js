@@ -32,6 +32,10 @@ const SpanContainer = styled('span')({
   background: 'yellow',
 })
 
+const ExtendedContainer = styled(SpanContainer)`
+  display: flex;
+`
+
 const Container = styled('button')`
   background: red;
   ${stylesInCallback}
