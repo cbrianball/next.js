@@ -17,7 +17,7 @@ export type RouteHas =
       value?: string
     }
   | {
-      type: 'host'
+      type: 'host' | 'method'
       key?: undefined
       value: string
     }
@@ -50,7 +50,7 @@ export type Redirect = {
 }
 
 export const allowedStatusCodes = new Set([301, 302, 303, 307, 308])
-const allowedHasTypes = new Set(['header', 'cookie', 'query', 'host'])
+const allowedHasTypes = new Set(['header', 'cookie', 'query', 'host', 'method'])
 const namedGroupsRegex = /\(\?<([a-zA-Z][a-zA-Z0-9]*)>/g
 
 export function getRedirectStatus(route: {
@@ -267,7 +267,11 @@ function checkCustomRoutes(
         if (!allowedHasTypes.has(hasItem.type)) {
           invalidHasParts.push(`invalid type "${hasItem.type}"`)
         }
-        if (typeof hasItem.key !== 'string' && hasItem.type !== 'host') {
+        if (
+          typeof hasItem.key !== 'string' &&
+          hasItem.type !== 'host' &&
+          hasItem.type !== 'method'
+        ) {
           invalidHasParts.push(`invalid key "${hasItem.key}"`)
         }
         if (
@@ -276,8 +280,11 @@ function checkCustomRoutes(
         ) {
           invalidHasParts.push(`invalid value "${hasItem.value}"`)
         }
-        if (typeof hasItem.value === 'undefined' && hasItem.type === 'host') {
-          invalidHasParts.push(`value is required for "host" type`)
+        if (
+          typeof hasItem.value === 'undefined' &&
+          (hasItem.type === 'host' || hasItem.type === 'method')
+        ) {
+          invalidHasParts.push(`value is required for "${hasItem.type}" type`)
         }
 
         if (invalidHasParts.length > 0) {

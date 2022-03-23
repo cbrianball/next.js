@@ -41,6 +41,10 @@ export function matchHas(
         value = hostname
         break
       }
+      case 'method': {
+        value = req?.method
+        break
+      }
       default: {
         break
       }
@@ -61,7 +65,10 @@ export function matchHas(
             Object.keys(matches.groups).forEach((groupKey) => {
               params[groupKey] = matches.groups![groupKey]
             })
-          } else if (hasItem.type === 'host' && matches[0]) {
+          } else if (
+            (hasItem.type === 'host' || hasItem.type === 'method') &&
+            matches[0]
+          ) {
             params.host = matches[0]
           }
         }
